@@ -1,0 +1,14 @@
+
+
+static class Program
+{
+    static void Main()
+    {
+        Console.WriteLine("Введите ваше имя: ");
+        string input = Console.ReadLine();
+        string name = string.IsNullOrWhiteSpace(input) ? "пользователь" : input.Trim();
+        string curretnDate = DateTime.Now.ToString("dd,mm,yyyy");
+        int nameLenghtg = name.Length;
+        Console.WriteLine($"\nПривет, {name!}");
+    }
+}
