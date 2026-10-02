@@ -1,14 +1,78 @@
-
-
+using System.Globalization;
 static class Program
 {
     static void Main()
     {
-        Console.WriteLine("Введите ваше имя: ");
+        Console.WriteLine("Введите ваше имя: "); //(Шаг перввый)
         string input = Console.ReadLine();
         string name = string.IsNullOrWhiteSpace(input) ? "пользователь" : input.Trim();
-        string curretnDate = DateTime.Now.ToString("dd,mm,yyyy");
+        string curretnDate = DateTime.Now.ToString("dd,MM,yyyy");
         int nameLenghtg = name.Length;
-        Console.WriteLine($"\nПривет, {name!}");
+        Console.WriteLine($"\nПривет, {name}! Сегодня на календаре: {curretnDate}");
+
+        var ruCulture = CultureInfo.InvariantCulture;
+
+        Console.WriteLine("Введите размер в байтах: "); //(Шаг второй)
+        string bytesInput = Console.ReadLine();
+        
+        if (!ulong.TryParse(bytesInput, out ulong bytes))
+        {
+            Console.WriteLine("Ошибка: Введено не число или некорректный формат!");
+            return;
+        }
+        Console.WriteLine("\n| Единица | Деление на 1000 | Деление на 1024 |");
+        Console.WriteLine("|---------|-----------------|-----------------|");
+
+        double kb1000 = (double)bytes / 1000;
+        double kb1024 = (double)bytes / 1024;
+        Console.WriteLine($"| КБ      | {kb1000,15:F2} | {kb1024,15:F2} |");
+        
+        double mb1000 = kb1000 / 1000;
+        double mb1024 = kb1024 / 1024;
+        Console.WriteLine($"| МБ      | {mb1000,15:F2} | {mb1024,15:F2} |");
+        
+        double gb1000 = mb1000 / 1000;
+        double gb1024 = mb1024 / 1024;
+        
+        Console.WriteLine($"| ГБ      | {gb1000,15:F2} | {gb1024,15:F2} |");
+
+        Console.WriteLine("Введите объем накопителя: "); //(Шаг третий)
+        string volumeInput = Console.ReadLine();
+
+        if (!double.TryParse(volumeInput, out double marketGb))
+        {
+            Console.WriteLine("Ошибка: введено не число.");
+            return;
+        }
+        double totalBytes = marketGb * 1_000_000_000;
+        double windowsGb = totalBytes / (1024 * 1024 * 1024);
+
+        double lossGb = marketGb - windowsGb;
+        double lossPercent = (lossGb / marketGb) * 100;
+
+        long windowsMb = (long)(windowsGb * 1024);
+        long photoSizeMb = 4;
+
+        long photoCount = windowsMb / photoSizeMb;
+        long remainingMb = windowsMb % photoSizeMb;
+        double remainingGb = (double)remainingMb / 1024;
+
+        Console.WriteLine("\n=== РЕЗУЛЬТАТЫ РАСЧЕТА ===");
+        Console.WriteLine($"Windows покажет: {windowsGb:F2} ГБ");
+        Console.WriteLine($"«Пропало»: {lossGb:F2} ГБ ({lossPercent:F2}%)");
+
+        Console.WriteLine($"\nДополнительно:");
+        Console.WriteLine($"Поместится фотографий (по 4 МБ): {photoCount} шт.");
+        Console.WriteLine($"Останется свободного места: {remainingMb} МБ ({remainingGb:F4} ГБ)");
+
+        Console.WriteLine("\n=== ОБЪЯСНЕНИЕ ===");
+        Console.WriteLine("На самом деле память не пропала. Производители накопителей считают, что в 1 ГБ = 1000 МБ.");
+        Console.WriteLine("А операционная система Windows считает в двоичной системе: 1 ГБ = 1024 МБ.");
+        Console.WriteLine("Из-за этой разницы в подсчетах чистая флешка кажется меньше, хотя все байты на месте.");
+
+        Console.WriteLine("Введите размер Инсульта (в ГБ): "); //(Шаг четвертый)
+        double fileSize = Convert.ToDouble(Console.ReadLine());
+
+
     }
 }
