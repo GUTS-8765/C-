@@ -1,6 +1,8 @@
 using System.Globalization;
 static class Program
 {
+    private static int fileSizeGb;
+
     static void Main()
     {
         Console.WriteLine("Введите ваше имя: "); //(Шаг перввый)
@@ -14,7 +16,7 @@ static class Program
 
         Console.WriteLine("Введите размер в байтах: "); //(Шаг второй)
         string bytesInput = Console.ReadLine();
-        
+
         if (!ulong.TryParse(bytesInput, out ulong bytes))
         {
             Console.WriteLine("Ошибка: Введено не число или некорректный формат!");
@@ -26,14 +28,14 @@ static class Program
         double kb1000 = (double)bytes / 1000;
         double kb1024 = (double)bytes / 1024;
         Console.WriteLine($"| КБ      | {kb1000,15:F2} | {kb1024,15:F2} |");
-        
+
         double mb1000 = kb1000 / 1000;
         double mb1024 = kb1024 / 1024;
         Console.WriteLine($"| МБ      | {mb1000,15:F2} | {mb1024,15:F2} |");
-        
+
         double gb1000 = mb1000 / 1000;
         double gb1024 = mb1024 / 1024;
-        
+
         Console.WriteLine($"| ГБ      | {gb1000,15:F2} | {gb1024,15:F2} |");
 
         Console.WriteLine("Введите объем накопителя: "); //(Шаг третий)
@@ -73,6 +75,23 @@ static class Program
         Console.WriteLine("Введите размер Инсульта (в ГБ): "); //(Шаг четвертый)
         double fileSize = Convert.ToDouble(Console.ReadLine());
 
+        Console.WriteLine("Введите скорость тарифа в Мегабайтах в секунду: ");
+        double speedMbps = Convert.ToDouble(Console.ReadLine());
+
+        double speedMbytesPerSec = speedMbps / 8;
+        double fileSizeMb = fileSizeGb * 1000;
+
+        double totalSecondsExact = fileSizeMb / speedMbytesPerSec;
+        int totalSecondsRounded = (int)Math.Ceiling(totalSecondsExact);
+
+        int hours = totalSecondsRounded / 3600;
+        int minutes = (totalSecondsRounded % 3600) / 60;
+        int seconds = totalSecondsRounded % 60;
+
+        Console.WriteLine($"\nСкорость: {speedMbytesPerSec} Мбайт/с");
+        Console.WriteLine($"Время скачивания: {hours} час(а/ов) {minutes} минут(ы) {seconds} секунд(ы)");
+
+        Console.WriteLine("Введите строку: "); //(Шаг пятый)
 
     }
 }
