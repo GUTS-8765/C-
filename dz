@@ -133,10 +133,6 @@ Console.WriteLine("--- Проверка правила ---");
 Console.WriteLine($"Ожидаемое число байт:  {expectedBytes}");
 Console.WriteLine($"Реальное число байт:   {utf8Bytes}");
 
-
-
-
-
 int surrogatePairs = 0;
 for (int i = 0; i < text.Length - 1; i++)
 {
@@ -161,4 +157,74 @@ static bool IsRussianLetter(char c)
 static bool IsLatinLetter(char c)
 {
     return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+}
+
+Console.WriteLine("\n===== МЕНЮ ====="); //(Шаг шестой)
+Console.WriteLine("1. Сложение двух чисел");
+Console.WriteLine("2. Вычитание двух чисел");
+Console.WriteLine("3. Умножение двух чисел");
+Console.WriteLine("4. Деление двух чисел");
+Console.WriteLine("5. Возведение в степень");
+Console.WriteLine("0. Выход");
+Console.Write("Выберите пункт: ");
+
+string choice = Console.ReadLine();
+
+switch (choice)
+{
+    case "1":
+        DoOperation(name, "сложения", (a, b) => a + b);
+        break;
+    case "2":
+        DoOperation(name, "вычитания", (a, b) => a - b);
+        break;
+    case "3":
+        DoOperation(name, "умножения", (a, b) => a * b);
+        break;
+    case "4":
+        DoOperation(name, "деления", (a, b) =>
+        {
+            if (b == 0) throw new DivideByZeroException("Деление на ноль невозможно");
+            return a / b;
+        });
+        break;
+    case "5":
+        DoOperation(name, "возведения в степень", (a, b) => Math.Pow(a, b));
+        break;
+    case "0":
+        
+        Console.WriteLine($"До свидания, {name}!");
+        break;
+    default:
+        Console.WriteLine("Ошибка: такого пункта меню не существует. Попробуйте снова.");
+        break;
+}
+        
+    
+
+    static void DoOperation(string name, string operationName, Func<double, double, double> operation)
+{
+    try
+    {
+        Console.Write("Введите первое число: ");
+        double a = double.Parse(Console.ReadLine());
+
+        Console.Write("Введите второе число: ");
+        double b = double.Parse(Console.ReadLine());
+
+        double result = operation(a, b);
+        Console.WriteLine($"Результат {operationName}: {result}");
+    }
+    catch (FormatException)
+    {
+        Console.WriteLine("Ошибка: введено не число. Возврат в меню.");
+    }
+    catch (DivideByZeroException ex)
+    {
+        Console.WriteLine($"Ошибка: {ex.Message}. Возврат в меню.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Ошибка: {ex.Message}. Возврат в меню.");
+    }
 }
