@@ -1,20 +1,18 @@
-using System;
 using System.Globalization;
 using System.Text;
+int fileSizeGb = 0;
+object utf8Bytes = null;
 
-Console.OutputEncoding = Encoding.UTF8;
-Console.InputEncoding = Encoding.UTF8;
-
-Console.WriteLine("Введите ваше имя: ");
+Console.WriteLine("Введите ваше имя: "); //(Шаг перввый)
 string input = Console.ReadLine();
 string name = string.IsNullOrWhiteSpace(input) ? "пользователь" : input.Trim();
-string currentDate = DateTime.Now.ToString("dd.MM.yyyy");
-int nameLength = name.Length;
-Console.WriteLine($"\nПривет, {name}! Сегодня на календаре: {currentDate}");
+string curretnDate = DateTime.Now.ToString("dd,MM,yyyy");
+int nameLenghtg = name.Length;
+Console.WriteLine($"\nПривет, {name}! Сегодня на календаре: {curretnDate}");
 
 var ruCulture = CultureInfo.InvariantCulture;
 
-Console.WriteLine("Введите размер в байтах: ");
+Console.WriteLine("Введите размер в байтах: "); //(Шаг второй)
 string bytesInput = Console.ReadLine();
 
 if (!ulong.TryParse(bytesInput, out ulong bytes))
@@ -22,7 +20,6 @@ if (!ulong.TryParse(bytesInput, out ulong bytes))
     Console.WriteLine("Ошибка: Введено не число или некорректный формат!");
     return;
 }
-
 Console.WriteLine("\n| Единица | Деление на 1000 | Деление на 1024 |");
 Console.WriteLine("|---------|-----------------|-----------------|");
 
@@ -36,9 +33,10 @@ Console.WriteLine($"| МБ      | {mb1000,15:F2} | {mb1024,15:F2} |");
 
 double gb1000 = mb1000 / 1000;
 double gb1024 = mb1024 / 1024;
+
 Console.WriteLine($"| ГБ      | {gb1000,15:F2} | {gb1024,15:F2} |");
 
-Console.WriteLine("Введите объем накопителя: ");
+Console.WriteLine("Введите объем накопителя: "); //(Шаг третий)
 string volumeInput = Console.ReadLine();
 
 if (!double.TryParse(volumeInput, out double marketGb))
@@ -46,7 +44,6 @@ if (!double.TryParse(volumeInput, out double marketGb))
     Console.WriteLine("Ошибка: введено не число.");
     return;
 }
-
 double totalBytes = marketGb * 1_000_000_000;
 double windowsGb = totalBytes / (1024 * 1024 * 1024);
 
@@ -63,6 +60,7 @@ double remainingGb = (double)remainingMb / 1024;
 Console.WriteLine("\n=== РЕЗУЛЬТАТЫ РАСЧЕТА ===");
 Console.WriteLine($"Windows покажет: {windowsGb:F2} ГБ");
 Console.WriteLine($"«Пропало»: {lossGb:F2} ГБ ({lossPercent:F2}%)");
+
 Console.WriteLine($"\nДополнительно:");
 Console.WriteLine($"Поместится фотографий (по 4 МБ): {photoCount} шт.");
 Console.WriteLine($"Останется свободного места: {remainingMb} МБ ({remainingGb:F4} ГБ)");
@@ -72,14 +70,14 @@ Console.WriteLine("На самом деле память не пропала. П
 Console.WriteLine("А операционная система Windows считает в двоичной системе: 1 ГБ = 1024 МБ.");
 Console.WriteLine("Из-за этой разницы в подсчетах чистая флешка кажется меньше, хотя все байты на месте.");
 
-Console.WriteLine("Введите размер файла (в ГБ): ");
+Console.WriteLine("Введите размер Файла (в ГБ): "); //(Шаг четвертый)
 double fileSize = Convert.ToDouble(Console.ReadLine());
 
-Console.WriteLine("Введите скорость тарифа в Мегабитах в секунду: ");
+Console.WriteLine("Введите скорость тарифа в Мегабайтах в секунду: ");
 double speedMbps = Convert.ToDouble(Console.ReadLine());
 
 double speedMbytesPerSec = speedMbps / 8;
-double fileSizeMb = fileSize * 1000;
+double fileSizeMb = fileSizeGb * 1000;
 
 double totalSecondsExact = fileSizeMb / speedMbytesPerSec;
 int totalSecondsRounded = (int)Math.Ceiling(totalSecondsExact);
@@ -91,15 +89,18 @@ int seconds = totalSecondsRounded % 60;
 Console.WriteLine($"\nСкорость: {speedMbytesPerSec} Мбайт/с");
 Console.WriteLine($"Время скачивания: {hours} час(а/ов) {minutes} минут(ы) {seconds} секунд(ы)");
 
-Console.WriteLine("\nВведите строку для анализа: ");
-string text = Console.ReadLine() ?? "";
+Console.WriteLine("Введите строку: "); //(Шаг пятый)
+string text = Console.ReadLine();
+
+Console.OutputEncoding = Encoding.UTF8;
+Console.InputEncoding = Encoding.UTF8;
 
 int charCount = text.Length;
 int textElementCount = 0;
 var enumerator = StringInfo.GetTextElementEnumerator(text);
 while (enumerator.MoveNext()) textElementCount++;
 
-int utf8Bytes = Encoding.UTF8.GetByteCount(text);
+
 int russian = 0, latin = 0, digits = 0, spaces = 0, punctuation = 0, other = 0;
 
 foreach (char c in text)
@@ -132,11 +133,9 @@ Console.WriteLine("--- Проверка правила ---");
 Console.WriteLine($"Ожидаемое число байт:  {expectedBytes}");
 Console.WriteLine($"Реальное число байт:   {utf8Bytes}");
 
-bool v = expectedBytes == utf8Bytes;
 
-Console.WriteLine(v
-    ? "✔ Правило выполняется."
-    : $"✘ Правило НЕ выполняется. Разница: {utf8Bytes - expectedBytes} байт.");
+
+
 
 int surrogatePairs = 0;
 for (int i = 0; i < text.Length - 1; i++)
