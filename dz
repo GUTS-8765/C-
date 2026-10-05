@@ -192,17 +192,14 @@ switch (choice)
         DoOperation(name, "возведения в степень", (a, b) => Math.Pow(a, b));
         break;
     case "0":
-        
+
         Console.WriteLine($"До свидания, {name}!");
         break;
     default:
         Console.WriteLine("Ошибка: такого пункта меню не существует. Попробуйте снова.");
         break;
 }
-        
-    
-
-    static void DoOperation(string name, string operationName, Func<double, double, double> operation)
+static void DoOperation(string name, string operationName, Func<double, double, double> operation)
 {
     try
     {
@@ -228,3 +225,5 @@ switch (choice)
         Console.WriteLine($"Ошибка: {ex.Message}. Возврат в меню.");
     }
 }
+Console.WriteLine("\nНажмите Enter для завершения программы: " ); //(Шаг седьмой)
+Console.ReadLine();
