@@ -2,46 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 
-// ================== Данные ==================
 
-// Список популярных паролей (из открытых утечек)
 string[] popularPasswords =
 {
     "123456", "password", "123456789", "12345678", "12345",
     "1234567", "qwerty", "abc123", "football", "monkey",
-    "letmein", "111111", "mustang", "access", "shadow",
-    "master", "michael", "superman", "696969", "batman",
-    "iloveyou", "dragon", "sunshine", "princess", "admin",
-    "welcome", "login", "passw0rd", "hello", "charlie"
+    "letmein", "111111", "mustang", "access", "shadow"
 };
 
-// Словарь для парольных фраз (128 слов — тема «повседневное вокруг»)
 string[] phraseWords =
 {
     "кот", "пёс", "лиса", "волк", "медведь", "заяц", "ёж", "сова",
     "орёл", "тигр", "лев", "слон", "жираф", "зебра", "крот", "бобр",
-    "выдра", "ласка", "куница", "рысь", "гепард", "леопард", "пума", "ягуар",
-
-    "лес", "река", "гора", "море", "озеро", "поле", "луг", "сад",
-    "небо", "солнце", "луна", "звезда", "облако", "дождь", "снег", "ветер",
-    "гроза", "радуга", "рассвет", "закат", "туман", "иней", "лёд", "пламя",
-
-    "дом", "окно", "дверь", "стол", "стул", "кровать", "шкаф", "полка",
-    "лампа", "свеча", "книга", "тетрадь", "ручка", "карандаш", "кисть", "краска",
-    "чашка", "ложка", "вилка", "нож", "тарелка", "кастрюля", "чайник", "сковорода",
-
-    "хлеб", "сыр", "молоко", "масло", "мёд", "яблоко", "груша", "слива",
-    "вишня", "малина", "смородина", "арбуз", "дыня", "виноград", "банан", "апельсин",
-    "лимон", "персик", "абрикос", "гранат", "инжир", "финик", "орех", "каштан",
-
-    "поезд", "самолёт", "корабль", "лодка", "машина", "автобус", "трамвай", "метро",
-    "велосипед", "мотоцикл", "ракета", "вертолёт", "паром", "яхта", "катер", "троллейбус",
-
-    "дружба", "радость", "печаль", "надежда", "мечта", "память", "мысль", "слово",
-    "песня", "танец", "музыка", "картина", "история", "сказка", "загадка", "шутка"
+    "выдра", "ласка", "куница", "рысь", "гепард", "леопард", "пума", "ягуар"
 };
 
-// ================== Основной цикл ==================
 
 while (true)
 {
@@ -71,7 +46,6 @@ while (true)
     }
 }
 
-// ================== Меню и вспомогательный ввод ==================
 
 static void PrintMenu()
 {
@@ -108,7 +82,6 @@ static bool ReadYesNo(string prompt)
     }
 }
 
-// ================== Шаг 1. Размер алфавита ==================
 
 static int GetAlphabetSize(string password)
 {
@@ -119,8 +92,8 @@ static int GetAlphabetSize(string password)
         if (c >= 'a' && c <= 'z') lower = true;
         else if (c >= 'A' && c <= 'Z') upper = true;
         else if (c >= '0' && c <= '9') digit = true;
-        else if (c >= ' ' && c <= '~') other = true;   // остальные печатные ASCII
-        else nonAscii = true;                          // вне таблицы ASCII
+        else if (c >= ' ' && c <= '~') other = true;  
+        else nonAscii = true;                          
     }
 
     int size = 0;
@@ -133,7 +106,7 @@ static int GetAlphabetSize(string password)
     return size;
 }
 
-// ================== Шаг 2. Стойкость и оценка ==================
+
 
 static double CalculateEntropyBits(int length, int alphabetSize)
 {
@@ -150,14 +123,11 @@ static string GetStrengthLabel(double bits)
     return "очень сильный";
 }
 
-// ================== Шаг 3. Время перебора ==================
 
-// По умолчанию — быстрая хеш-функция: 10 миллиардов вариантов в секунду.
-// Для медленной (bcrypt/Argon2) передаём 10_000 — в миллион раз меньше.
 static double CalculateAverageCrackSeconds(double bits, double speed = 10_000_000_000)
 {
     double variants = Math.Pow(2, bits);
-    return variants / 2 / speed;   // в среднем — половина вариантов
+    return variants / 2 / speed;   
 }
 
 static string FormatTime(double seconds)
@@ -184,7 +154,7 @@ static string FormatTime(double seconds)
     return $"{years:F1} лет";
 }
 
-// ================== Шаг 4. Словарь и шаблоны ==================
+
 
 static bool IsPopularPassword(string password, string[] popular)
 {
@@ -196,13 +166,12 @@ static bool IsPopularPassword(string password, string[] popular)
     return false;
 }
 
-// Ловит пароли, «придуманные человеком»: один и тот же символ,
-// известные последовательности, популярное слово с цифрами в конце.
+
 static bool HasWeakPattern(string password, string[] popular)
 {
     if (password.Length == 0) return false;
 
-    // 1) все символы одинаковые
+    
     bool allSame = true;
     for (int i = 1; i < password.Length; i++)
     {
@@ -210,13 +179,12 @@ static bool HasWeakPattern(string password, string[] popular)
     }
     if (allSame) return true;
 
-    // 2) известные последовательности
+  
     string low = password.ToLower();
     if (low.Contains("12345")) return true;
     if (low.Contains("abcde")) return true;
     if (low.Contains("qwerty")) return true;
 
-    // 3) популярное слово + цифры в конце (например, Password123)
     int end = password.Length;
     while (end > 0 && password[end - 1] >= '0' && password[end - 1] <= '9') end--;
     if (end < password.Length && end > 0)
@@ -228,7 +196,7 @@ static bool HasWeakPattern(string password, string[] popular)
     return false;
 }
 
-// ================== Шаг 5. Генератор пароля ==================
+
 
 static string GeneratePassword(int length, bool useLower, bool useUpper, bool useDigits, bool useSpecial)
 {
@@ -251,35 +219,35 @@ static string GeneratePassword(int length, bool useLower, bool useUpper, bool us
     char[] chars = new char[length];
     int pos = 0;
 
-    // По одному обязательному символу из каждой выбранной группы
+
     foreach (string group in groups)
     {
         chars[pos++] = group[RandomNumberGenerator.GetInt32(group.Length)];
     }
 
-    // Остальные символы — из общего алфавита
+ 
     string all = string.Concat(groups);
     while (pos < length)
     {
         chars[pos++] = all[RandomNumberGenerator.GetInt32(all.Length)];
     }
 
-    // Обязательные символы не должны всегда быть в начале
+    
     Shuffle(chars);
     return new string(chars);
 }
 
-// Алгоритм Фишера — Йетса: каждая перестановка равновероятна
+
 static void Shuffle(char[] chars)
 {
     for (int i = chars.Length - 1; i > 0; i--)
     {
-        int j = RandomNumberGenerator.GetInt32(i + 1); // 0..i
+        int j = RandomNumberGenerator.GetInt32(i + 1); 
         (chars[i], chars[j]) = (chars[j], chars[i]);
     }
 }
 
-// ================== Шаг 6. Парольная фраза ==================
+
 
 static string GeneratePassphrase(string[] words, int count)
 {
@@ -297,7 +265,7 @@ static double CalculatePhraseBits(int wordCount, int dictionarySize)
     return wordCount * Math.Log2(dictionarySize);
 }
 
-// ================== Интерактив: проверка пароля ==================
+
 
 static void CheckPasswordInteractive(string[] popular)
 {
@@ -318,7 +286,7 @@ static void CheckPasswordInteractive(string[] popular)
     Console.WriteLine($"Размер алфавита:  {alphabet}");
     Console.WriteLine($"Стойкость:        {bits:F1} бит");
 
-    // Словарная атака: популярные пароли подбираются мгновенно
+    
     if (IsPopularPassword(password, popular))
     {
         PrintColored("Пароль в списке популярных — подбирается мгновенно!", ConsoleColor.Red);
@@ -338,8 +306,8 @@ static void CheckPasswordInteractive(string[] popular)
 
     PrintColored($"Оценка: {label}", GetLabelColor(label));
 
-    double secondsFast = CalculateAverageCrackSeconds(bits);            // 10^10 в сек
-    double secondsSlow = CalculateAverageCrackSeconds(bits, 10_000);    // bcrypt/Argon2
+    double secondsFast = CalculateAverageCrackSeconds(bits);           
+    double secondsSlow = CalculateAverageCrackSeconds(bits, 10_000);   
     Console.WriteLine($"Среднее время перебора (быстрая хеш-функция): {FormatTime(secondsFast)}");
     Console.WriteLine($"Среднее время перебора (bcrypt/Argon2):       {FormatTime(secondsSlow)}");
 }
@@ -362,7 +330,7 @@ static void PrintColored(string text, ConsoleColor color)
     Console.ForegroundColor = old;
 }
 
-// ================== Интерактив: генерация пароля ==================
+
 
 static void GeneratePasswordInteractive()
 {
@@ -408,7 +376,7 @@ static void GeneratePasswordInteractive()
     }
 }
 
-// ================== Интерактив: парольная фраза ==================
+
 
 static void GeneratePassphraseInteractive(string[] words)
 {
@@ -434,7 +402,7 @@ static void GeneratePassphraseInteractive(string[] words)
         Console.WriteLine($"   Стойкость {bits:F1} бит, время перебора: {FormatTime(seconds)}");
     }
 
-    // Сколько слов нужно, чтобы догнать 12-символьный случайный пароль (71,5 бит)
+    
     const double targetBits = 71.5;
     int forOurs = (int)Math.Ceiling(targetBits / perWord);
     int forDice = (int)Math.Ceiling(targetBits / Math.Log2(7776));
@@ -446,7 +414,7 @@ static void GeneratePassphraseInteractive(string[] words)
     Console.WriteLine("Вывод: чем больше словарь, тем меньше слов нужно для той же стойкости.");
 }
 
-// ================== Шаг 3 в наглядном виде ==================
+
 
 static void ShowCrackTimeExamples()
 {
