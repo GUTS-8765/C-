@@ -1,0 +1,247 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+class Program
+{
+    // ---------- Параллельные списки (приём 4) ----------
+    static List<string> names   = new List<string>();
+    static List<int>    years   = new List<int>();
+    static List<double> ratings = new List<double>();
+    static List<bool>   done    = new List<bool>();
+    static List<string> genres  = new List<string>();
+
+    const string FILE = "catalog.csv";
+    const char SEP = ';';
+
+    static void Main()
+    {
+        Load();
+
+        while (true)
+        {
+            Console.WriteLine();
+            Console.WriteLine("=== КАТАЛОГ ИГР ===");
+            Console.WriteLine("1. Показать все");
+            Console.WriteLine("2. Добавить запись");
+            Console.WriteLine("3. Найти по названию");
+            Console.WriteLine("4. Фильтр по рейтингу (больше чем)");
+            Console.WriteLine("5. Топ-3 по рейтингу");
+            Console.WriteLine("6. Статистика");
+            Console.WriteLine("0. Сохранить и выйти");
+            Console.Write("Выбор: ");
+
+            string cmd = Console.ReadLine();
+            switch (cmd)
+            {
+                case "1": ShowAll();   break;
+                case "2": AddRecord(); break;
+                case "3": Search();    break;
+                case "4": Filter();    break;
+                case "5": Top3();      break;
+                case "6": Stats();     break;
+                case "0":
+                    Save();
+                    Console.WriteLine("Сохранено. Пока!");
+                    return;
+                default:
+                    Console.WriteLine("Нет такого пункта.");
+                    break;
+            }
+        }
+    }
+
+    // ---------- Приём 2: ровные колонки ----------
+    static void PrintHeader()
+    {
+        Console.WriteLine("{0,-25} {1,6} {2,8} {3,9} {4,-12}",
+            "Название", "Год", "Рейтинг", "Пройдено", "Жанр");
+        Console.WriteLine(new string('-', 65));
+    }
+
+    static void PrintRow(int i)
+    {
+        Console.WriteLine("{0,-25} {1,6} {2,8:F1} {3,9} {4,-12}",
+            names[i], years[i], ratings[i],
+            done[i] ? "да" : "нет", genres[i]);
+    }
+
+    static void ShowAll()
+    {
+        if (names.Count == 0) { Console.WriteLine("Каталог пуст."); return; }
+        PrintHeader();
+        for (int i = 0; i < names.Count; i++) PrintRow(i);
+    }
+
+    // ---------- Приём 1: TryParse в цикле ----------
+    static int ReadInt(string prompt)
+    {
+        while (true)
+        {
+            Console.Write(prompt);
+            if (int.TryParse(Console.ReadLine(), out int v)) return v;
+            Console.WriteLine("Это не целое число. Ещё раз.");
+        }
+    }
+
+    static double ReadDouble(string prompt)
+    {
+        while (true)
+        {
+            Console.Write(prompt);
+            if (double.TryParse(Console.ReadLine(), out double v)) return v;
+            Console.WriteLine("Это не число. Ещё раз.");
+        }
+    }
+
+    static bool ReadBool(string prompt)
+    {
+        while (true)
+        {
+            Console.Write(prompt + " (да/нет): ");
+            string s = Console.ReadLine().Trim().ToLower();
+            if (s == "да" || s == "yes" || s == "y" || s == "1") return true;
+            if (s == "нет" || s == "no"  || s == "n" || s == "0") return false;
+            Console.WriteLine("Ответьте «да» или «нет».");
+        }
+    }
+
+    static string ReadName(string prompt)
+    {
+        while (true)
+        {
+            Console.Write(prompt);
+            string s = Console.ReadLine().Trim();
+            if (s.Length == 0) { Console.WriteLine("Пустое название не годится."); continue; }
+            if (s.Contains(SEP)) // Эксперимент 1: запрет разделителя
+            {
+                Console.WriteLine("Название не должно содержать '" + SEP + "'.");
+                continue;
+            }
+            return s;
+        }
+    }
+
+    // ---------- Добавление (INSERT) ----------
+    static void AddRecord()
+    {
+        string n = ReadName("Название: ");
+        int    y = ReadInt("Год выпуска: ");
+        double r = ReadDouble("Рейтинг (например 9,1): ");
+        bool   d = ReadBool("Пройдено?");
+        Console.Write("Жанр: ");
+        string g = Console.ReadLine().Trim();
+
+        names.Add(n); years.Add(y); ratings.Add(r); done.Add(d); genres.Add(g);
+        Console.WriteLine("Запись добавлена.");
+    }
+
+    // ---------- Поиск (WHERE по подстроке, приём 3) ----------
+    static void Search()
+    {
+        Console.Write("Часть названия: ");
+        string q = Console.ReadLine().Trim().ToLower();
+        bool found = false;
+        PrintHeader();
+        for (int i = 0; i < names.Count; i++)
+        {
+            if (names[i].ToLower().Contains(q))
+            {
+                PrintRow(i);
+                found = true;
+            }
+        }
+        if (!found) Console.WriteLine("Ничего не найдено.");
+    }
+
+    // ---------- Фильтр по рейтингу ----------
+    static void Filter()
+    {
+        double min = ReadDouble("Рейтинг больше чем: ");
+        bool found = false;
+        PrintHeader();
+        for (int i = 0; i < names.Count; i++)
+        {
+            if (ratings[i] > min) { PrintRow(i); found = true; }
+        }
+        if (!found) Console.WriteLine("Подходящих записей нет.");
+    }
+
+    // ---------- Топ-3: копируем индексы и сортируем ----------
+    static void Top3()
+    {
+        if (names.Count == 0) { Console.WriteLine("Каталог пуст."); return; }
+
+        var idx = Enumerable.Range(0, names.Count).ToList();
+        idx.Sort((a, b) => ratings[b].CompareTo(ratings[a])); // по убыванию
+
+        PrintHeader();
+        int top = Math.Min(3, idx.Count);
+        for (int k = 0; k < top; k++) PrintRow(idx[k]);
+    }
+
+    // ---------- Статистика ----------
+    static void Stats()
+    {
+        int cnt = names.Count;
+        if (cnt == 0) { Console.WriteLine("Каталог пуст."); return; }
+
+        int sum = 0, yes = 0;
+        for (int i = 0; i < cnt; i++)
+        {
+            sum += years[i];
+            if (done[i]) yes++;
+        }
+        double avgYear = (double)sum / cnt; // Приём 6: приводим ДО деления
+        double pctDone = 100.0 * yes / cnt;
+
+        Console.WriteLine("Всего записей: {0}", cnt);
+        Console.WriteLine("Средний год выпуска: {0:F2}", avgYear);
+        Console.WriteLine("Пройдено: {0} из {1} ({2:F1}%)", yes, cnt, pctDone);
+    }
+
+    // ---------- Файл (приём 5) ----------
+    static void Save()
+    {
+        var lines = new List<string>();
+        for (int i = 0; i < names.Count; i++)
+        {
+            lines.Add(string.Join(SEP.ToString(),
+                names[i], years[i], ratings[i], done[i] ? "да" : "нет", genres[i]));
+        }
+        File.WriteAllLines(FILE, lines);
+    }
+
+    // Загрузка: битые строки пропускаются (эксперимент 2)
+    static void Load()
+    {
+        if (!File.Exists(FILE))
+        {
+            Console.WriteLine("Файл не найден — начинаем с пустого каталога.");
+            return;
+        }
+
+        string[] lines = File.ReadAllLines(FILE);
+        int ok = 0, bad = 0;
+        foreach (string line in lines)
+        {
+            if (line.Trim().Length == 0) continue;
+            string[] p = line.Split(SEP);
+            if (p.Length != 5) { bad++; continue; }
+
+            if (!int.TryParse(p[1], out int y) ||
+                !double.TryParse(p[2], out double r))
+            {
+                bad++;
+                continue;
+            }
+
+            bool d = p[3].Trim().ToLower() == "да";
+            names.Add(p[0]); years.Add(y); ratings.Add(r);
+            done.Add(d); genres.Add(p[4]);
+            ok++;
+        }
+        Console.WriteLine("Загружено записей: {0}, пропущено битых: {1}", ok, bad);
+    }
+}
